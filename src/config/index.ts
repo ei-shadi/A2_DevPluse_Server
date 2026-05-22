@@ -13,6 +13,7 @@ const config = {
   environment: env.NODE_ENV || "development",
   database_url: env.DATABASE_URL as string,
   port: env.PORT || 3000,
+  jwt_secret_key: env.JWT_SECRET_KEY as string,
 };
 
 export default config;
