@@ -1,7 +1,6 @@
 import { sql } from "./index";
 
 export const createSchema = async () => {
-  // Users Table Creation
   await sql`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -15,7 +14,6 @@ export const createSchema = async () => {
     )
   `;
 
-  // Issues Table Creation
   await sql`
     CREATE TABLE IF NOT EXISTS issues (
       id SERIAL PRIMARY KEY,
