@@ -201,6 +201,13 @@ export const updateIssueInDB = async (
     throw error;
   }
 
+  // If maintainer tries to update the status to an empty string, block it
+  if(status?.length === 0) {
+    const error: any = new Error("Invalid Issue Status. Status cannot be an empty string. Please provide a valid status.");
+    error.statusCode = 400;
+    throw error;
+  }
+
   // 4. Validate the issue type if it is provided in the request body
   if (type && issueType[type as keyof typeof issueType] === undefined) {
     const error: any = new Error(`Invalid Issue Type: '${type}'. Please provide a valid type.`);
@@ -230,6 +237,8 @@ export const updateIssueInDB = async (
 
   return updatedIssues[0];
 };
+
+
 
 export const issueService = {
   createIssueIntoDB,
