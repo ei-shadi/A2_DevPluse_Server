@@ -1,12 +1,12 @@
 import config from "../../config";
 import { sql } from "../../db";
-import { type TAuthUser, type TUser } from "../../types/user";
+import { USER_ROLE, type TAuthUser, type TUser } from "../../types/user";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 // Registration Service
-const registerUserIntoDB = async (payload: TAuthUser) =>  {
-  const {name, email, password, role} = payload;
+const registerUserIntoDB = async (payload: TAuthUser) => {
+  const { name, email, password, role } = payload;
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -15,7 +15,13 @@ const registerUserIntoDB = async (payload: TAuthUser) =>  {
   `;
 
   if (existingUser.length > 0) {
-    throw new Error("Email is already registered. Please try with another one.");
+    throw new Error(
+      "Email is already registered. Please try with another one.",
+    );
+  }
+
+  if (!role || USER_ROLE[role] === undefined) {
+    throw new Error("Invalid role provided. Please try with valid role.");
   }
 
   const result = await sql`
@@ -25,14 +31,14 @@ const registerUserIntoDB = async (payload: TAuthUser) =>  {
   `;
 
   return result[0];
-
-}
-
+};
 
 // Login Service
-const loginUserIntoDB = async (payload: {email: string, password: string}) => {
-
-  const {email, password} = payload;
+const loginUserIntoDB = async (payload: {
+  email: string;
+  password: string;
+}) => {
+  const { email, password } = payload;
 
   // TODO: User email Validation
   const existingUser = await sql`
@@ -42,8 +48,8 @@ const loginUserIntoDB = async (payload: {email: string, password: string}) => {
   if (existingUser.length === 0) {
     throw new Error("Invalid Email. Please try with a registered email.");
   }
-  
-  const {password: hashedPassword, ...user} = existingUser[0] as TUser;
+
+  const { password: hashedPassword, ...user } = existingUser[0] as TUser;
 
   // TODO: Password Validation
   const isPasswordValid = await bcrypt.compare(password, hashedPassword);
@@ -57,17 +63,16 @@ const loginUserIntoDB = async (payload: {email: string, password: string}) => {
     id: user.id,
     name: user.name,
     role: user.role,
-  }
+  };
 
-  const token = jwt.sign(jwtPayload, config.jwt_secret_key, {expiresIn: "1d"});
-
+  const token = jwt.sign(jwtPayload, config.jwt_secret_key, {
+    expiresIn: "1d",
+  });
 
   return { token, user };
-
 };
-
 
 export const authService = {
   registerUserIntoDB,
   loginUserIntoDB,
-}
+};

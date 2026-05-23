@@ -2,10 +2,17 @@ import type { Request, Response } from "express";
 import sendResponse from "../../utils/sendResponse";
 import { issueService } from "./issue.service";
 
+// Create Issue Controller
+const createIssue = async (req: Request, res: Response) => {
+  const user = req.user;
 
-const createIssue = (req: Request, res: Response) => {
+  const payload = {
+    reporter_id: user?.id,
+    ...req.body,
+  };
+
   try {
-    const result = issueService.createIssueIntoDB(req.body);
+    const result = await issueService.createIssueIntoDB(payload);
 
     sendResponse(res, {
       statusCode: 200,
