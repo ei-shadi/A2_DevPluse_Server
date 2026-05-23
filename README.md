@@ -1,6 +1,6 @@
 <div align="center">
   <h1>
-    <strong>🚼 DevPulse API</strong>
+    <strong><a href="https://devpluse-server.vercel.app">🚼 DevPulse API</a></strong>
   </h1>
 
   <p><strong>Internal Tech Issue & Feature Tracker Backend API</strong></p>
@@ -199,46 +199,6 @@ Protected Routes Verify JWT
 
 ---
 
-<h2 align="center">📁 Project Folder Structure</h2>
-
-```bash
-src/
-│
-├── app.ts
-├── server.ts
-│
-├── config/
-│   └── db.ts
-│
-├── modules/
-│   ├── auth/
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   ├── auth.route.ts
-│   │   └── auth.validation.ts
-│   │
-│   └── issues/
-│       ├── issue.controller.ts
-│       ├── issue.service.ts
-│       ├── issue.route.ts
-│       └── issue.validation.ts
-│
-├── middleware/
-│   ├── auth.middleware.ts
-│   ├── role.middleware.ts
-│   └── error.middleware.ts
-│
-├── utils/
-│   ├── jwt.ts
-│   ├── bcrypt.ts
-│   └── response.ts
-│
-└── types/
-    └── index.ts
-```
-
----
-
 <h2 align="center">⚙️ Installation & Setup</h2>
 
 ## 1️⃣ Clone Repository
@@ -267,17 +227,6 @@ PORT=YOUR_PORT_NUMBER_HERE
 DATABASE_URL=YOUR_DATABASE_URL_HERE
 NODE_ENV=YOUR_ENVIRONMENT_HERE
 JWT_SECRET_KEY=YOUR_JWT_SECRET_KEY_HERE
-```
-
----
-
-## 📄 Example Environment File
-
-```bash
-PORT=5000
-DATABASE_URL=postgresql://username:password@localhost:5432/devpulse
-NODE_ENV=development
-JWT_SECRET_KEY=your_super_secret_key
 ```
 
 ---
@@ -315,7 +264,7 @@ https://devpluse-server.vercel.app/
 
 ---
 
-## 📁 Actual Project Structure
+## 📁 Project Structure
 
 ```bash
 src/
@@ -367,22 +316,6 @@ npm run dev
 
 ```bash
 npm run build
-```
-
----
-
-## 6️⃣ Run Production Server
-
-```bash
-npm start
-```
-
----
-
-<h2 align="center">🌐 Base API URL</h2>
-
-```bash
-http://localhost:5000/api
 ```
 
 ---
