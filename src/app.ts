@@ -7,7 +7,6 @@ import CookieParser from "cookie-parser";
 import globalErrorHandler from "./middleware/globalErrorHandler";
 import { authRoute } from "./modules/auth/auth.route";
 import { issueRoute } from "./modules/issues/issue.route";
-import cors from "cors";
 
 const app: Application = express();
 
