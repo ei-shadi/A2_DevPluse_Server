@@ -149,7 +149,7 @@ const createIssueIntoDB = async (payload: TIssue) => {
 };
 
 // Update Issue Service
-export const updateIssueInDB = async (
+export const updateIssueIntoDB = async (
   issueId: string,
   currentUser: any,
   updateData: { title?: string; description?: string; type?: string; status?: string }, 
@@ -239,10 +239,41 @@ export const updateIssueInDB = async (
 };
 
 
+// Delete Issue Service
+const deleteIssueFromDB = async (issueId: string, currentUser: any) => {
+  // 1. Check if the user is authenticated
+  if (!currentUser) {
+    const error: any = new Error("Unauthorized Access!!");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  // 2. Is the user a Maintainer?
+  const isMaintainer = currentUser.role === "maintainer";
+  
+  if (!isMaintainer) {
+    const error: any = new Error("Forbidden: Only Maintainers can delete Issues.");
+    error.statusCode = 403; 
+    throw error;
+  }
+
+  // 3. Validate the issue ID input
+  if (!issueId) {
+    const error: any = new Error("Issue ID is required for deletion.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // 4. Delete the issue from the database
+  const result = await sql`
+    DELETE FROM issues
+    WHERE id = ${issueId}`;
+};
 
 export const issueService = {
   createIssueIntoDB,
   getAllIssuesFromDB,
   getIssueByIdFromDB,
-  updateIssueInDB,
+  updateIssueIntoDB,
+  deleteIssueFromDB,
 };
