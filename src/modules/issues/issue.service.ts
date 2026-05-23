@@ -41,7 +41,6 @@ const getAllIssuesFromDB = async (filters: TIssueQueryFilters) => {
       ? sql`ORDER BY created_at ASC`
       : sql`ORDER BY created_at DESC`;
 
-
   // 4. Combine everything into one single safe query using Neon's template compiler
   const issues = await sql`
     SELECT id, title, description, type, status, reporter_id, created_at, updated_at 
@@ -82,10 +81,11 @@ const getAllIssuesFromDB = async (filters: TIssueQueryFilters) => {
 
 // Get Single Issue By Id Service
 const getIssueByIdFromDB = async (id: string) => {
-
   // Input Validation: Ensure 'id' is a valid numeric string before querying
   if (!id || isNaN(Number(id))) {
-    throw new Error("Invalid Issue ID Provided. Please provide a valid numeric ID.");
+    throw new Error(
+      "Invalid Issue ID Provided. Please provide a valid numeric ID.",
+    );
   }
 
   // 1. Fetch the issue by ID with proper typing
@@ -148,8 +148,92 @@ const createIssueIntoDB = async (payload: TIssue) => {
   return result[0];
 };
 
+// Update Issue Service
+export const updateIssueInDB = async (
+  issueId: string,
+  currentUser: any,
+  updateData: { title?: string; description?: string; type?: string; status?: string }, 
+) => {
+  const { title, description, type, status } = updateData;
+
+  // 1. Check if the user is authenticated
+  if (!currentUser) {
+    const error: any = new Error("Unauthorized Access!!");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  // 2. Fetch the current state of the issue from the database
+  const issues = await sql`
+    SELECT id, reporter_id, status FROM issues WHERE id = ${issueId}
+  `;
+  const existingIssue = issues[0];
+
+  // Throw a 404 Error if the issue does not exist in the database
+  if (!existingIssue) {
+    const error: any = new Error("Issue not found!!");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // 3. Evaluate Authorization Access Rules
+  const isMaintainer = currentUser.role === "maintainer";
+  const isOwner = existingIssue.reporter_id === currentUser.id;
+  const isStatusOpen = existingIssue.status === "open";
+
+  // Contributors are only authorized if they own the issue and its status is still 'open'
+  const isAllowedContributor =
+    currentUser.role === "contributor" && isOwner && isStatusOpen;
+
+  // Throw a 403 Forbidden Error if the user matches neither permissible criteria
+  if (!isMaintainer && !isAllowedContributor) {
+    const error: any = new Error(
+      "Forbidden! Contributors can only update their own issues, not other people's issues, and only if their issue status is still 'open'.",
+    );
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // If a contributor tries to pass a 'status' field in the body, block it
+  if (status && !isMaintainer) {
+    const error: any = new Error("Forbidden! Only Maintainers are allowed to update the Issue Status.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // 4. Validate the issue type if it is provided in the request body
+  if (type && issueType[type as keyof typeof issueType] === undefined) {
+    const error: any = new Error(`Invalid Issue Type: '${type}'. Please provide a valid type.`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Validate the issue status if it is provided by a maintainer
+  if (status && issueStatus[status as keyof typeof issueStatus] === undefined) {
+    const error: any = new Error(`Invalid Issue Status: '${status}'. Please provide a valid status.`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // 5. Execute the dynamic database update query using COALESCE to safely preserve missing fields
+  const updatedIssues = await sql`
+    UPDATE issues
+    SET 
+      title = COALESCE(${title}, title),
+      description = COALESCE(${description}, description),
+      type = COALESCE(${type}, type),
+      status = COALESCE(${status}, status),
+      updated_at = NOW()
+    WHERE id = ${issueId}
+    RETURNING id, title, description, type, status, reporter_id, created_at, updated_at
+  `;
+
+  return updatedIssues[0];
+};
+
 export const issueService = {
   createIssueIntoDB,
   getAllIssuesFromDB,
   getIssueByIdFromDB,
+  updateIssueInDB,
 };
