@@ -80,6 +80,49 @@ const getAllIssuesFromDB = async (filters: TIssueQueryFilters) => {
   });
 };
 
+// Get Single Issue By Id Service
+const getIssueByIdFromDB = async (id: string) => {
+
+  // Input Validation: Ensure 'id' is a valid numeric string before querying
+  if (!id || isNaN(Number(id))) {
+    throw new Error("Invalid Issue ID Provided. Please provide a valid numeric ID.");
+  }
+
+  // 1. Fetch the issue by ID with proper typing
+  const issues = (await sql`
+    SELECT id, title, description, type, status, reporter_id, created_at, updated_at 
+    FROM issues
+    WHERE id = ${id}
+  `) as TIssue[];
+
+  // Early return if no issue is found with the given ID
+  if (issues.length === 0) {
+    throw new Error(`Issue with ID ${id} not found or does not exist.`);
+  }
+
+  // 2. Safely extract the first element from your typed array
+  const issue = issues[0];
+
+  // 3. Early return check to ensure 'issue' is not undefined
+  if (!issue) return null;
+
+  // 4. Fetch the reporter's details from the users table
+  const users = await sql`
+    SELECT id, name, role 
+    FROM users 
+    WHERE id = ${issue.reporter_id}
+  `;
+
+  // 5. Exclude 'reporter_id' from the issue object using destructuring
+  const { reporter_id, ...issueData } = issue;
+
+  // 6. Return the reshaped data with the clean reporter object injected
+  return {
+    ...issueData,
+    reporter: users[0] || null,
+  };
+};
+
 // Create Issue Service
 const createIssueIntoDB = async (payload: TIssue) => {
   const { title, description, type, status, reporter_id } = payload;
@@ -108,4 +151,5 @@ const createIssueIntoDB = async (payload: TIssue) => {
 export const issueService = {
   createIssueIntoDB,
   getAllIssuesFromDB,
+  getIssueByIdFromDB,
 };

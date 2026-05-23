@@ -1,8 +1,9 @@
+import { authController } from './../auth/auth.controller';
 import type { Request, Response } from "express";
 import sendResponse from "../../utils/sendResponse";
 import { issueService } from "./issue.service";
 
-
+// Get All Issues Controller
 const getAllIssues = async (req: Request, res: Response) => {
   try {
     
@@ -30,6 +31,26 @@ const getAllIssues = async (req: Request, res: Response) => {
   }
 };
 
+// Get Single Issue By Id authController
+const getIssueById = async (req: Request, res: Response) => {
+  try {
+    const result = await issueService.getIssueByIdFromDB(req.params.id as string);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue fetched successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    sendResponse(res, {
+      statusCode: 500,
+      success: false,
+      message: error.message,
+      error: error,
+    });
+  }
+};
 
 // Create Issue Controller
 const createIssue = async (req: Request, res: Response) => {
@@ -63,4 +84,5 @@ const createIssue = async (req: Request, res: Response) => {
 export const issueController = {
   createIssue,
   getAllIssues,
+  getIssueById,
 };

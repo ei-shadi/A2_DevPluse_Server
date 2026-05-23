@@ -23,7 +23,7 @@ export type TIssue = {
   updated_at: Date;
 };
 
-// Filter Type For fetching 
+// Filter Type For fetching
 export type TIssueQueryFilters = {
   sort?: string;
   type?: string;
