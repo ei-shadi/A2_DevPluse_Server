@@ -22,3 +22,10 @@ export type TIssue = {
   created_at: Date;
   updated_at: Date;
 };
+
+// Filter Type For fetching 
+export type TIssueQueryFilters = {
+  sort?: string;
+  type?: string;
+  status?: string;
+};
